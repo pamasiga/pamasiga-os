@@ -1,0 +1,19 @@
+# Dependency directories
+node_modules/
+.venv/
+env/
+venv/
+
+# Virtual environments
+*.pyc
+__pycache__/
+
+# Env files
+.env
+*.env
+
+# IDE & tools
+# Note: .vscode/ and .cursor/ are included in this template
+# Individual projects may want to add them to .gitignore
+.idea/
+.DS_Store

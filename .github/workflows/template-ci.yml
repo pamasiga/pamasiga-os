@@ -1,0 +1,27 @@
+name: Template CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Validate folder structure exists
+      run: |
+        test -d apps
+        test -d services
+        test -d packages
+        test -d infra
+        test -d scripts
+        test -d tests
+
+    - name: Markdown lint (placeholder)
+      run: echo "TODO: add markdown lint"
+
+    - name: Placeholder test
+      run: echo "Tests go here"

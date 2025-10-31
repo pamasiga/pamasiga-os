@@ -1,0 +1,9 @@
+# AI Code Assistant Rules
+
+Follow repository documentation.
+Ask before major structural changes.
+Show diff before writing.
+Never introduce framework-specific code without user request.
+Honor modularity and replaceability.
+Never hard-code secrets or credentials.
+Use placeholders when language/framework unknown.
