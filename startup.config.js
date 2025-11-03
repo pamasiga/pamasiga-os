@@ -79,14 +79,14 @@ module.exports = {
   links: {
     // GitHub repository
     github: {
-      org: 'YOUR_ORG',           // Replace with your GitHub org/username
+      org: 'pamasiga',           // Replace with your GitHub org/username
       repo: 'pamasiga-os',       // Replace with your repo name
-      url: 'https://github.com/YOUR_ORG/pamasiga-os'
+      url: 'https://github.com/pamasiga/pamasiga-os'
     },
 
     // Documentation site
     docs: {
-      url: 'https://YOUR_ORG.github.io/pamasiga-os',
+      url: 'https://pamasiga.github.io/pamasiga-os',
       basePath: '/pamasiga-os'   // For GitHub Pages
     },
 
