@@ -1,0 +1,559 @@
+# Supabase Integration
+
+import { Tabs } from '../../components/Tabs'
+import { Cards, Card } from '../../components/Cards'
+import { Database, Shield, Zap, Code } from 'lucide-react'
+
+Integrate **Supabase** as your backend-as-a-service for PAMASIGA OS projects.
+
+<Cards cols={2}>
+  <Card
+    title="PostgreSQL Database"
+    description="Powerful relational database with real-time subscriptions"
+    icon={<Database size={24} />}
+  />
+  <Card
+    title="Authentication"
+    description="Built-in auth with social providers and magic links"
+    icon={<Shield size={24} />}
+  />
+  <Card
+    title="Edge Functions"
+    description="Server-side logic with Deno at the edge"
+    icon={<Zap size={24} />}
+  />
+  <Card
+    title="Auto APIs"
+    description="Instant REST and GraphQL APIs from your schema"
+    icon={<Code size={24} />}
+  />
+</Cards>
+
+---
+
+## Quick Start
+
+### 1. Create Supabase Project
+
+1. Go to [supabase.com](https://supabase.com)
+2. Click **"New Project"**
+3. Fill in project details
+4. Wait for database provisioning (~2 minutes)
+
+### 2. Get Credentials
+
+From your Supabase dashboard:
+
+- **API URL**: `https://your-project.supabase.co`
+- **Anon Key**: Public key (safe for client-side)
+- **Service Role Key**: Private key (server-side only)
+
+### 3. Add to Environment Variables
+
+<Tabs items={['Local Development', 'GitHub Actions', 'Vercel']}>
+  <Tabs.Tab>
+    ```bash
+    # .env.local
+    NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    # Add via GitHub CLI
+    gh secret set SUPABASE_URL --body "https://your-project.supabase.co"
+    gh secret set SUPABASE_ANON_KEY --body "your-anon-key"
+    gh secret set SUPABASE_SERVICE_ROLE_KEY --body "your-service-role-key"
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    # Add via Vercel CLI
+    vercel env add NEXT_PUBLIC_SUPABASE_URL
+    vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
+    vercel env add SUPABASE_SERVICE_ROLE_KEY
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### 4. Install Supabase Client
+
+<Tabs items={['JavaScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+    ```bash
+    pnpm add @supabase/supabase-js
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    pip install supabase
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    go get github.com/supabase/supabase-go
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Setup
+
+### Create Supabase Client
+
+<Tabs items={['JavaScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+    ```typescript
+    // packages/database/src/supabase.ts
+    import { createClient } from '@supabase/supabase-js'
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+    export const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // Server-side client with service role
+    export const supabaseAdmin = createClient(
+      supabaseUrl,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```python
+    # services/api/database/supabase.py
+    import os
+    from supabase import create_client, Client
+
+    supabase_url = os.getenv("SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_ANON_KEY")
+
+    supabase: Client = create_client(supabase_url, supabase_key)
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```go
+    // services/api/database/supabase.go
+    package database
+
+    import (
+        "os"
+        supabase "github.com/supabase/supabase-go"
+    )
+
+    func NewSupabaseClient() *supabase.Client {
+        url := os.Getenv("SUPABASE_URL")
+        key := os.Getenv("SUPABASE_ANON_KEY")
+
+        client, _ := supabase.NewClient(url, key, nil)
+        return client
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Database Operations
+
+### Create a Table
+
+```sql
+-- Run in Supabase SQL Editor
+create table users (
+  id uuid primary key default uuid_generate_v4(),
+  email text unique not null,
+  name text,
+  created_at timestamp with time zone default now()
+);
+
+-- Enable Row Level Security
+alter table users enable row level security;
+
+-- Create policy
+create policy "Users can read their own data"
+  on users for select
+  using (auth.uid() = id);
+```
+
+### CRUD Operations
+
+<Tabs items={['JavaScript', 'Python']}>
+  <Tabs.Tab>
+    ```typescript
+    import { supabase } from './supabase'
+
+    // Create
+    const { data, error } = await supabase
+      .from('users')
+      .insert({ email: 'user@example.com', name: 'John Doe' })
+      .select()
+
+    // Read
+    const { data: users } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', 'user@example.com')
+
+    // Update
+    await supabase
+      .from('users')
+      .update({ name: 'Jane Doe' })
+      .eq('id', userId)
+
+    // Delete
+    await supabase
+      .from('users')
+      .delete()
+      .eq('id', userId)
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```python
+    from database.supabase import supabase
+
+    # Create
+    data = supabase.table('users').insert({
+        'email': 'user@example.com',
+        'name': 'John Doe'
+    }).execute()
+
+    # Read
+    users = supabase.table('users') \\
+        .select('*') \\
+        .eq('email', 'user@example.com') \\
+        .execute()
+
+    # Update
+    supabase.table('users') \\
+        .update({'name': 'Jane Doe'}) \\
+        .eq('id', user_id) \\
+        .execute()
+
+    # Delete
+    supabase.table('users') \\
+        .delete() \\
+        .eq('id', user_id) \\
+        .execute()
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Authentication
+
+### Setup Auth Provider
+
+<Tabs items={['Email/Password', 'Magic Link', 'OAuth (GitHub)']}>
+  <Tabs.Tab>
+    ```typescript
+    // Sign Up
+    const { data, error } = await supabase.auth.signUp({
+      email: 'user@example.com',
+      password: 'secure-password'
+    })
+
+    // Sign In
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: 'user@example.com',
+      password: 'secure-password'
+    })
+
+    // Sign Out
+    await supabase.auth.signOut()
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```typescript
+    // Send magic link
+    const { error } = await supabase.auth.signInWithOtp({
+      email: 'user@example.com',
+      options: {
+        emailRedirectTo: 'https://yourapp.com/auth/callback'
+      }
+    })
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```typescript
+    // OAuth with GitHub
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: 'https://yourapp.com/auth/callback'
+      }
+    })
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Protected Routes
+
+```typescript
+// middleware.ts
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next()
+  const supabase = createMiddlewareClient({ req, res })
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session && req.nextUrl.pathname.startsWith('/dashboard')) {
+    return NextResponse.redirect(new URL('/login', req.url))
+  }
+
+  return res
+}
+
+export const config = {
+  matcher: ['/dashboard/:path*']
+}
+```
+
+---
+
+## Real-time Subscriptions
+
+```typescript
+// Subscribe to changes
+const channel = supabase
+  .channel('users-changes')
+  .on(
+    'postgres_changes',
+    {
+      event: '*',
+      schema: 'public',
+      table: 'users'
+    },
+    (payload) => {
+      console.log('Change received!', payload)
+    }
+  )
+  .subscribe()
+
+// Unsubscribe
+channel.unsubscribe()
+```
+
+---
+
+## Storage (File Uploads)
+
+```typescript
+// Create a bucket (do this once in Supabase dashboard)
+// Then upload files:
+
+const { data, error } = await supabase
+  .storage
+  .from('avatars')
+  .upload('user-123/avatar.png', file, {
+    cacheControl: '3600',
+    upsert: false
+  })
+
+// Get public URL
+const { data: { publicUrl } } = supabase
+  .storage
+  .from('avatars')
+  .getPublicUrl('user-123/avatar.png')
+```
+
+---
+
+## Edge Functions
+
+Create serverless functions:
+
+```bash
+# Install Supabase CLI
+brew install supabase/tap/supabase
+
+# Initialize
+supabase init
+
+# Create function
+supabase functions new hello-world
+```
+
+```typescript
+// supabase/functions/hello-world/index.ts
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+
+serve(async (req) => {
+  const { name } = await req.json()
+
+  return new Response(
+    JSON.stringify({ message: `Hello ${name}!` }),
+    { headers: { 'Content-Type': 'application/json' } }
+  )
+})
+```
+
+Deploy:
+```bash
+supabase functions deploy hello-world
+```
+
+---
+
+## Database Migrations
+
+```bash
+# Create migration
+supabase migration new create_posts_table
+
+# Edit the migration file
+# supabase/migrations/XXXXXX_create_posts_table.sql
+
+create table posts (
+  id uuid primary key default uuid_generate_v4(),
+  title text not null,
+  content text,
+  author_id uuid references users(id),
+  created_at timestamp with time zone default now()
+);
+
+# Apply migrations
+supabase db push
+```
+
+---
+
+## CI/CD Integration
+
+Add to `.github/workflows/supabase.yml`:
+
+```yaml
+name: Supabase Migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy migrations
+        run: supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+```
+
+---
+
+## Best Practices
+
+### Security
+
+1. **Use Row Level Security (RLS)**
+   - Enable on all tables
+   - Define policies for each operation
+   - Test with different user roles
+
+2. **Never expose service role key**
+   - Keep it server-side only
+   - Use environment variables
+   - Never commit to git
+
+3. **Validate input**
+   - Use Supabase's built-in validation
+   - Add custom validation in edge functions
+   - Sanitize user input
+
+### Performance
+
+1. **Use indexes**
+   ```sql
+   create index users_email_idx on users(email);
+   ```
+
+2. **Select only needed columns**
+   ```typescript
+   // Good
+   .select('id, name, email')
+
+   // Bad (returns everything)
+   .select('*')
+   ```
+
+3. **Use pagination**
+   ```typescript
+   .range(0, 9)  // First 10 items
+   .range(10, 19)  // Next 10 items
+   ```
+
+### Development Workflow
+
+1. **Local development**
+   ```bash
+   supabase start  # Start local Supabase
+   supabase db reset  # Reset local database
+   ```
+
+2. **Type generation**
+   ```bash
+   supabase gen types typescript --local > types/supabase.ts
+   ```
+
+3. **Database branching**
+   - Use staging project for testing
+   - Apply migrations to staging first
+   - Test thoroughly before production
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**Connection errors:**
+- Check `.env` variables are set
+- Verify project URL is correct
+- Ensure anon key matches project
+
+**RLS blocking queries:**
+- Check policies are set up
+- Test with service role key (server-side)
+- Use Supabase dashboard to test policies
+
+**Slow queries:**
+- Add indexes to frequently queried columns
+- Use `explain analyze` in SQL editor
+- Limit result sets with `.range()`
+
+---
+
+## Resources
+
+- [Supabase Documentation](https://supabase.com/docs)
+- [JavaScript Client Docs](https://supabase.com/docs/reference/javascript/introduction)
+- [Python Client Docs](https://supabase.com/docs/reference/python/introduction)
+- [Community Discord](https://discord.supabase.com)
+
+---
+
+## Next Steps
+
+- [Set up Vercel deployment](/integrations/vercel)
+- [Configure GitHub integration](/integrations/github)
+- [Add authentication to your app](/guides/authentication)
+- [Build your first API](/guides/api-development)

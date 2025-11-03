@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/YOUR_ORG/pamasiga-os/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📚 Documentation
+    url: https://YOUR_ORG.github.io/pamasiga-os
+    about: Read the full documentation
+  - name: 🐛 Security Issue
+    url: https://github.com/YOUR_ORG/pamasiga-os/security/advisories/new
+    about: Report a security vulnerability privately

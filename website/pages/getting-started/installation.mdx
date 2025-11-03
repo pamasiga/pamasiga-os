@@ -1,0 +1,218 @@
+# Installation
+
+Get PAMASIGA OS up and running in your development environment.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+### Required
+
+- **Node.js** 18 or later
+- **pnpm** 8 or later (or npm/yarn)
+- **Git** 2.x or later
+- **GitHub CLI** (`gh`)
+
+### Optional
+
+- **Docker** for containerization
+- **Just** command runner
+- **VS Code** or **Cursor** IDE
+
+## Check Your Setup
+
+Run these commands to verify your environment:
+
+```bash
+# Check Node.js version
+node --version
+# Should output: v18.0.0 or higher
+
+# Check pnpm version
+pnpm --version
+# Should output: 8.0.0 or higher
+
+# Check Git version
+git --version
+# Should output: git version 2.x.x
+
+# Check GitHub CLI
+gh --version
+# Should output: gh version x.x.x
+
+# Authenticate with GitHub
+gh auth login
+```
+
+## Installation Methods
+
+### Method 1: Use This Template (Recommended)
+
+1. Go to the [PAMASIGA OS repository](https://github.com/YOUR_ORG/pamasiga-os)
+2. Click **"Use this template"**
+3. Select **"Create a new repository"**
+4. Fill in your repository details
+5. Click **"Create repository from template"**
+
+Then clone your new repository:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/your-repo.git
+cd your-repo
+pnpm install
+```
+
+### Method 2: Clone Directly
+
+Clone the PAMASIGA OS repository:
+
+```bash
+git clone https://github.com/YOUR_ORG/pamasiga-os.git my-project
+cd my-project
+rm -rf .git
+git init
+pnpm install
+```
+
+### Method 3: Use degit (Clean Copy)
+
+For a clean copy without git history:
+
+```bash
+npx degit YOUR_ORG/pamasiga-os my-project
+cd my-project
+git init
+pnpm install
+```
+
+## Run the Setup Wizard
+
+After installation, customize the template for your project:
+
+```bash
+pnpm run setup
+```
+
+The wizard will ask you for:
+
+- **Project name** (e.g., "Acme Corp")
+- **GitHub repository** details
+- **Brand colors** (primary, accent)
+- **Contact information**
+- **Team members**
+- **Tech stack** preferences
+
+## Initialize Git Repository
+
+If you haven't already, initialize your git repository:
+
+```bash
+git init
+git add .
+git commit -m "init: setup from PAMASIGA OS template"
+```
+
+## Create GitHub Repository
+
+Create a new repository on GitHub:
+
+```bash
+gh repo create my-project --public --source=. --remote=origin --push
+```
+
+Or manually:
+
+1. Create a new repository on GitHub
+2. Add the remote and push:
+
+```bash
+git remote add origin https://github.com/YOUR_USERNAME/my-project.git
+git branch -M main
+git push -u origin main
+```
+
+## Set Up GitHub Features
+
+### Create Labels
+
+```bash
+pnpm run create-labels
+```
+
+### Enable Discussions
+
+```bash
+gh api repos/YOUR_USERNAME/my-project --method PATCH -f has_discussions=true
+```
+
+### Enable GitHub Pages
+
+1. Go to repository **Settings → Pages**
+2. Source: **Deploy from a branch**
+3. Branch: **gh-pages** / **/** (root)
+4. Click **Save**
+
+## Verify Installation
+
+Check that everything is working:
+
+```bash
+# Run linting
+just lint
+
+# Run tests (if you have added tests)
+just test
+
+# Run the docs site locally
+cd website
+pnpm dev
+```
+
+Visit http://localhost:3000 to see your documentation site.
+
+## Next Steps
+
+- [Quick Start Guide](/getting-started/quick-start) - Start building
+- [Adoption Guide](/adoption-guide) - Customize for your needs
+- [Configuration](/getting-started/configuration) - Learn about startup.config.js
+
+## Troubleshooting
+
+### pnpm not found
+
+Install pnpm:
+
+```bash
+npm install -g pnpm
+# or
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
+
+### gh not found
+
+Install GitHub CLI:
+
+- **macOS**: `brew install gh`
+- **Windows**: `winget install GitHub.cli`
+- **Linux**: Follow instructions at https://cli.github.com/
+
+### Permission denied
+
+Make sure scripts are executable:
+
+```bash
+chmod +x scripts/*.js
+```
+
+### Node version too old
+
+Use nvm to install a newer version:
+
+```bash
+nvm install 20
+nvm use 20
+```
+
+---
+
+Need help? [Open an issue](https://github.com/YOUR_ORG/pamasiga-os/issues) or ask in [Discussions](https://github.com/YOUR_ORG/pamasiga-os/discussions).

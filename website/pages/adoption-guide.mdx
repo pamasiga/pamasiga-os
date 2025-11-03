@@ -1,0 +1,273 @@
+# Adoption Guide
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info">
+  This guide will help you adopt PAMASIGA OS as the foundation for your startup's engineering infrastructure.
+</Callout>
+
+## Overview
+
+PAMASIGA OS is designed to be a **template** that you fork and customize for your own startup. Everything is parameterized through a single configuration file (`startup.config.js`), making it easy to brand and customize.
+
+## What You're Getting
+
+### Infrastructure
+- ✅ Monorepo structure (apps/, services/, packages/)
+- ✅ CI/CD pipelines (GitHub Actions)
+- ✅ Documentation site (this site!)
+- ✅ Development tools (Justfile, EditorConfig)
+
+### GitHub Ecosystem
+- ✅ Issue & PR templates
+- ✅ Label system
+- ✅ Discussions setup
+- ✅ Project boards
+
+### Engineering Standards
+- ✅ AI-augmented workflows
+- ✅ Code review process
+- ✅ Security practices
+- ✅ Quality gates
+
+## Adoption Steps
+
+### 1. Fork the Template
+
+Click **"Use this template"** on GitHub or:
+
+```bash
+npx degit YOUR_ORG/pamasiga-os my-startup
+cd my-startup
+```
+
+### 2. Run the Setup Wizard
+
+```bash
+pnpm install
+pnpm run setup
+```
+
+Answer the questions:
+- Project name
+- GitHub details
+- Brand colors
+- Contact info
+- Team members
+
+### 3. Customize Configuration
+
+The wizard updates `startup.config.js`, but you can manually edit it:
+
+```js
+module.exports = {
+  project: {
+    name: 'Your Startup',
+    tagline: 'Building the future',
+    description: '...',
+  },
+  branding: {
+    colors: {
+      primary: '#YOUR_COLOR',
+      accent: '#YOUR_ACCENT'
+    }
+  },
+  // ... more settings
+}
+```
+
+<Callout type="warning">
+  After editing `startup.config.js`, run `pnpm run create-labels` to update GitHub labels.
+</Callout>
+
+### 4. Add Your Logo
+
+1. Create your logo files (SVG recommended)
+2. Place them in `website/public/`:
+   - `logo-light.svg` - Logo for light mode
+   - `logo-dark.svg` - Logo for dark mode
+   - `favicon.ico` - Browser favicon
+3. Update paths in `startup.config.js`
+
+### 5. Customize Documentation
+
+Edit files in `website/pages/`:
+
+```bash
+cd website/pages
+# Edit homepage
+vim index.mdx
+# Add your guides
+vim guides/your-guide.mdx
+```
+
+### 6. Set Up GitHub
+
+```bash
+# Create labels
+pnpm run create-labels
+
+# Enable Discussions
+gh api repos/OWNER/REPO --method PATCH -f has_discussions=true
+
+# Enable GitHub Pages in repository settings
+```
+
+### 7. Deploy
+
+Push your changes:
+
+```bash
+git add .
+git commit -m "chore: customize PAMASIGA OS for [Your Startup]"
+git push
+```
+
+GitHub Actions will automatically deploy your docs site to GitHub Pages.
+
+## Configuration Reference
+
+### Project Identity
+
+```js
+project: {
+  name: 'Your Startup',           // Shown everywhere
+  tagline: 'Short description',   // Shown in header
+  description: 'Longer...',       // For SEO, README
+  type: 'saas',                   // template, library, platform
+  version: '0.1.0',               // Semantic version
+  license: 'MIT'                  // Open source license
+}
+```
+
+### Branding
+
+```js
+branding: {
+  colors: {
+    primary: '#0066FF',   // Main brand color
+    accent: '#00D9FF',    // Accent/highlight color
+    success: '#00C851',   // Success states
+    warning: '#FFBB33',   // Warning states
+    danger: '#FF4444'     // Error states
+  },
+  logo: {
+    light: '/logo-light.svg',
+    dark: '/logo-dark.svg',
+    favicon: '/favicon.ico'
+  }
+}
+```
+
+### Links
+
+```js
+links: {
+  github: {
+    org: 'your-org',
+    repo: 'your-repo',
+    url: 'https://github.com/your-org/your-repo'
+  },
+  docs: {
+    url: 'https://your-org.github.io/your-repo',
+    basePath: '/your-repo'
+  },
+  social: {
+    twitter: 'https://twitter.com/handle',
+    linkedin: 'https://linkedin.com/company/name',
+    discord: 'https://discord.gg/invite'
+  }
+}
+```
+
+### Team
+
+```js
+team: {
+  maintainers: [
+    {
+      name: 'Your Name',
+      role: 'Founder & CTO',
+      github: 'username',
+      avatar: 'https://github.com/username.png'
+    }
+  ]
+}
+```
+
+## Common Customizations
+
+### Change Brand Colors
+
+Edit `startup.config.js` and update `branding.colors`. Then rebuild docs:
+
+```bash
+cd website
+pnpm build
+```
+
+### Add Your Tech Stack
+
+Update `features.techStack`:
+
+```js
+features: {
+  techStack: {
+    frontend: ['React', 'Next.js', 'TypeScript'],
+    backend: ['Node.js', 'Express', 'PostgreSQL'],
+    infrastructure: ['Docker', 'AWS']
+  }
+}
+```
+
+### Customize GitHub Labels
+
+Edit `github.labels` in `startup.config.js`, then:
+
+```bash
+pnpm run create-labels
+```
+
+### Add Custom CI/CD Workflows
+
+Create new workflow files in `.github/workflows/`. See the [Workflows guide](/workflows) for examples.
+
+## Advanced Customization
+
+### Custom Theme
+
+Edit `website/theme.config.jsx` to customize the Nextra theme beyond what's in `startup.config.js`.
+
+### Custom Components
+
+Create React components in `website/components/` and use them in MDX files:
+
+```mdx
+import { MyComponent } from '../components/MyComponent'
+
+<MyComponent />
+```
+
+### Add Versioning
+
+Update `docs.versioning` in config:
+
+```js
+docs: {
+  versioning: {
+    enabled: true,
+    currentVersion: '1.0.0',
+    versions: ['1.0.0', '0.9.0']
+  }
+}
+```
+
+## Next Steps
+
+- [Quick Start](/getting-started/quick-start) - Start building
+- [Architecture](/architecture/overview) - Understand the structure
+- [CI/CD Workflows](/workflows/overview) - Set up automation
+
+---
+
+**Questions?** Ask in [GitHub Discussions](https://github.com/YOUR_ORG/pamasiga-os/discussions).

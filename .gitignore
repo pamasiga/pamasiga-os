@@ -17,3 +17,6 @@ __pycache__/
 # Individual projects may want to add them to .gitignore
 .idea/
 .DS_Store
+website/.next
+website/out
+website/node_modules

@@ -1,0 +1,47 @@
+{
+  "name": "pamasiga-os",
+  "version": "0.1.0",
+  "description": "AI-Augmented Software Development Platform - Template for Startups",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup-wizard.js",
+    "create-labels": "node scripts/create-github-labels.js",
+    "docs:dev": "cd website && pnpm dev",
+    "docs:build": "cd website && pnpm build",
+    "docs:start": "cd website && pnpm start",
+    "lint": "echo 'Add your linting commands here'",
+    "format": "echo 'Add your formatting commands here'",
+    "test": "echo 'Add your test commands here'",
+    "prepare": "node -e \"try { require('husky').install() } catch (e) {}\""
+  },
+  "keywords": [
+    "template",
+    "startup",
+    "ai-development",
+    "monorepo",
+    "ci-cd",
+    "github-actions",
+    "engineering-practices",
+    "documentation",
+    "nextra"
+  ],
+  "author": "PAMASIGA OS Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_ORG/pamasiga-os.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_ORG/pamasiga-os/issues"
+  },
+  "homepage": "https://YOUR_ORG.github.io/pamasiga-os",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "devDependencies": {
+    "husky": "^8.0.3"
+  }
+}

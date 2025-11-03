@@ -1,0 +1,683 @@
+# Vercel Deployment
+
+import { Tabs } from '../../components/Tabs'
+import { Cards, Card } from '../../components/Cards'
+import { Zap, Globe, Lock, BarChart3 } from 'lucide-react'
+
+Deploy PAMASIGA OS projects to **Vercel** - the platform for frontend frameworks and static sites.
+
+<Cards cols={2}>
+  <Card
+    title="Instant Deployments"
+    description="Push to git and deploy automatically in seconds"
+    icon={<Zap size={24} />}
+  />
+  <Card
+    title="Global CDN"
+    description="Edge network in 100+ locations worldwide"
+    icon={<Globe size={24} />}
+  />
+  <Card
+    title="HTTPS & Security"
+    description="Automatic SSL certificates and DDoS protection"
+    icon={<Lock size={24} />}
+  />
+  <Card
+    title="Analytics"
+    description="Real-time insights and Web Vitals monitoring"
+    icon={<BarChart3 size={24} />}
+  />
+</Cards>
+
+---
+
+## Quick Start
+
+### 1. Install Vercel CLI
+
+```bash
+pnpm add -g vercel
+```
+
+### 2. Login to Vercel
+
+```bash
+vercel login
+```
+
+### 3. Deploy
+
+```bash
+# From your project root
+vercel
+
+# Follow prompts:
+# - Link to existing project? N
+# - What's your project name? my-startup
+# - Which directory? ./
+# - Want to override settings? N
+```
+
+Your site is now live! Vercel provides a preview URL.
+
+---
+
+## Configuration
+
+### vercel.json
+
+Create `vercel.json` in your project root:
+
+<Tabs items={['Next.js', 'Static Site', 'Full Stack']}>
+  <Tabs.Tab>
+    ```json
+    {
+      "buildCommand": "cd apps/web && pnpm build",
+      "outputDirectory": "apps/web/.next",
+      "framework": "nextjs",
+      "installCommand": "pnpm install",
+      "regions": ["iad1", "sfo1"],
+      "env": {
+        "NEXT_PUBLIC_API_URL": "@api_url"
+      }
+    }
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```json
+    {
+      "buildCommand": "cd website && pnpm build",
+      "outputDirectory": "website/out",
+      "cleanUrls": true,
+      "trailingSlash": false,
+      "regions": ["iad1", "sfo1"]
+    }
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```json
+    {
+      "buildCommand": "pnpm build",
+      "outputDirectory": "dist",
+      "framework": "nextjs",
+      "functions": {
+        "api/**/*.ts": {
+          "memory": 1024,
+          "maxDuration": 10
+        }
+      },
+      "rewrites": [
+        {
+          "source": "/api/:path*",
+          "destination": "/api/:path*"
+        }
+      ]
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Environment Variables
+
+### Add via CLI
+
+```bash
+# Production
+vercel env add NEXT_PUBLIC_SUPABASE_URL production
+vercel env add DATABASE_URL production
+
+# Preview (for PRs)
+vercel env add NEXT_PUBLIC_SUPABASE_URL preview
+
+# Development
+vercel env add API_KEY development
+```
+
+### Add via Dashboard
+
+1. Go to **Project Settings → Environment Variables**
+2. Add variable name and value
+3. Select environments (Production, Preview, Development)
+4. Click **Save**
+
+### Pull Environment Variables Locally
+
+```bash
+vercel env pull .env.local
+```
+
+---
+
+## Automatic Deployments
+
+### GitHub Integration
+
+1. **Connect Repository**
+   ```bash
+   vercel link
+   # Or in dashboard: Import Git Repository
+   ```
+
+2. **Configure Build Settings**
+   - **Build Command**: `pnpm build`
+   - **Output Directory**: `dist` or `.next`
+   - **Install Command**: `pnpm install`
+   - **Root Directory**: `./` or `apps/web`
+
+3. **Set Branch Settings**
+   - **Production Branch**: `main`
+   - **Preview Branches**: All branches
+   - **Ignored Build Step**: Optional
+
+### Deployment Triggers
+
+```json
+// vercel.json
+{
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "preview": true
+    }
+  },
+  "github": {
+    "autoAlias": true,
+    "silent": false,
+    "autoJobCancelation": true
+  }
+}
+```
+
+---
+
+## Monorepo Setup
+
+For PAMASIGA OS monorepo structure:
+
+### Option 1: Multiple Vercel Projects
+
+Deploy each app separately:
+
+```bash
+# Deploy web app
+cd apps/web
+vercel --prod
+
+# Deploy docs site
+cd website
+vercel --prod
+```
+
+### Option 2: Turborepo Integration
+
+```json
+// vercel.json
+{
+  "buildCommand": "pnpm turbo run build --filter=web",
+  "outputDirectory": "apps/web/dist",
+  "installCommand": "pnpm install"
+}
+```
+
+### Option 3: Vercel Monorepo Support
+
+```json
+// vercel.json (root)
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/web/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "website/package.json",
+      "use": "@vercel/static-build"
+    }
+  ]
+}
+```
+
+---
+
+## Serverless Functions
+
+### Create API Routes
+
+<Tabs items={['Next.js API Routes', 'Vercel Functions']}>
+  <Tabs.Tab>
+    ```typescript
+    // apps/web/pages/api/hello.ts
+    import type { NextApiRequest, NextApiResponse } from 'next'
+
+    export default function handler(
+      req: NextApiRequest,
+      res: NextApiResponse
+    ) {
+      res.status(200).json({ message: 'Hello from Vercel!' })
+    }
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```typescript
+    // api/hello.ts
+    import type { VercelRequest, VercelResponse } from '@vercel/node'
+
+    export default function handler(
+      req: VercelRequest,
+      res: VercelResponse
+    ) {
+      res.status(200).json({ message: 'Hello from Vercel!' })
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Function Configuration
+
+```json
+// vercel.json
+{
+  "functions": {
+    "api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "api/heavy-task.ts": {
+      "memory": 3008,
+      "maxDuration": 60
+    }
+  }
+}
+```
+
+---
+
+## Edge Functions
+
+Deploy to Vercel's Edge Network:
+
+```typescript
+// middleware.ts
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export function middleware(request: NextRequest) {
+  // Get country from request
+  const country = request.geo?.country || 'US'
+
+  // Add custom header
+  const response = NextResponse.next()
+  response.headers.set('x-country', country)
+
+  return response
+}
+
+export const config = {
+  matcher: '/api/:path*'
+}
+```
+
+```typescript
+// pages/api/edge/hello.ts
+export const config = {
+  runtime: 'edge'
+}
+
+export default function handler(req: Request) {
+  return new Response(
+    JSON.stringify({ message: 'Hello from the Edge!' }),
+    {
+      headers: { 'content-type': 'application/json' }
+    }
+  )
+}
+```
+
+---
+
+## Custom Domains
+
+### Add Domain
+
+```bash
+# Via CLI
+vercel domains add yourdomain.com
+
+# Or in dashboard:
+# Project Settings → Domains → Add
+```
+
+### Configure DNS
+
+**Option 1: Vercel Nameservers** (Recommended)
+```
+ns1.vercel-dns.com
+ns2.vercel-dns.com
+```
+
+**Option 2: CNAME Record**
+```
+CNAME @ cname.vercel-dns.com
+```
+
+**Option 3: A Records**
+```
+A @ 76.76.21.21
+```
+
+### SSL Certificates
+
+- Automatically provisioned
+- Auto-renews
+- Supports wildcards
+- Free for all domains
+
+---
+
+## Preview Deployments
+
+Every push to a branch gets a unique preview URL:
+
+```
+https://my-startup-git-feature-username.vercel.app
+```
+
+### Preview Comments
+
+Vercel automatically comments on:
+- GitHub Pull Requests
+- GitLab Merge Requests
+- Bitbucket Pull Requests
+
+With:
+- ✅ Preview URL
+- 🔍 Deployment status
+- 📊 Performance metrics
+
+### Password Protection
+
+```json
+// vercel.json
+{
+  "public": false,
+  "password": {
+    "mode": "required"
+  }
+}
+```
+
+Or set via dashboard: **Project Settings → General → Password Protection**
+
+---
+
+## Performance Optimization
+
+### Image Optimization
+
+```typescript
+import Image from 'next/image'
+
+export function Avatar({ src, alt }) {
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={100}
+      height={100}
+      loading="lazy"
+      quality={90}
+    />
+  )
+}
+```
+
+### Edge Caching
+
+```typescript
+// pages/api/data.ts
+export default function handler(req, res) {
+  res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate')
+  res.json({ data: 'cached for 24 hours' })
+}
+```
+
+### Incremental Static Regeneration (ISR)
+
+```typescript
+export async function getStaticProps() {
+  const data = await fetchData()
+
+  return {
+    props: { data },
+    revalidate: 60  // Regenerate every 60 seconds
+  }
+}
+```
+
+---
+
+## Analytics
+
+### Web Vitals
+
+```typescript
+// pages/_app.tsx
+import { Analytics } from '@vercel/analytics/react'
+
+export default function App({ Component, pageProps }) {
+  return (
+    <>
+      <Component {...pageProps} />
+      <Analytics />
+    </>
+  )
+}
+```
+
+### Speed Insights
+
+```typescript
+import { SpeedInsights } from '@vercel/speed-insights/next'
+
+export default function App({ Component, pageProps }) {
+  return (
+    <>
+      <Component {...pageProps} />
+      <SpeedInsights />
+    </>
+  )
+}
+```
+
+View metrics in: **Dashboard → Analytics → Web Vitals**
+
+---
+
+## CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+```
+
+### Environment Secrets
+
+Add to GitHub:
+```bash
+gh secret set VERCEL_TOKEN --body "your-vercel-token"
+gh secret set VERCEL_ORG_ID --body "team_xxxxx"
+gh secret set VERCEL_PROJECT_ID --body "prj_xxxxx"
+```
+
+Get values from:
+```bash
+vercel project ls
+vercel whoami
+```
+
+---
+
+## Monitoring & Logs
+
+### Real-time Logs
+
+```bash
+# View logs
+vercel logs
+
+# Follow logs (live)
+vercel logs --follow
+
+# Filter by function
+vercel logs --output api/hello.ts
+```
+
+### Error Tracking
+
+Integrate with error tracking:
+
+```typescript
+// Sentry example
+import * as Sentry from '@sentry/nextjs'
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.VERCEL_ENV
+})
+```
+
+---
+
+## Best Practices
+
+### 1. Use Environment Variables
+
+```typescript
+// ✅ Good
+const apiUrl = process.env.NEXT_PUBLIC_API_URL
+
+// ❌ Bad
+const apiUrl = 'https://hardcoded-url.com'
+```
+
+### 2. Optimize Bundle Size
+
+```bash
+# Analyze bundle
+ANALYZE=true vercel build
+
+# View report
+open .next/analyze/client.html
+```
+
+### 3. Implement Caching
+
+```typescript
+// Static: Cache forever
+export const revalidate = false
+
+// ISR: Revalidate every hour
+export const revalidate = 3600
+
+// Dynamic: Don't cache
+export const dynamic = 'force-dynamic'
+```
+
+### 4. Use Edge for Speed
+
+```typescript
+export const config = {
+  runtime: 'edge'  // Runs in 100+ locations
+}
+```
+
+### 5. Monitor Performance
+
+- Enable Web Vitals tracking
+- Set up alerts for slow pages
+- Monitor Core Web Vitals scores
+- Track conversion funnels
+
+---
+
+## Troubleshooting
+
+### Build Failures
+
+```bash
+# Check build logs
+vercel logs
+
+# Test build locally
+vercel build
+
+# Common fixes:
+# 1. Check NODE_VERSION in vercel.json
+# 2. Verify all dependencies in package.json
+# 3. Ensure build command is correct
+```
+
+### Environment Variables Not Working
+
+1. Check spelling (case-sensitive)
+2. Verify environment (Production/Preview/Development)
+3. Redeploy after adding variables
+4. Use `NEXT_PUBLIC_` prefix for client-side variables
+
+### Custom Domain Issues
+
+```bash
+# Verify DNS
+dig yourdomain.com
+
+# Check Vercel DNS
+vercel dns ls
+
+# Force SSL renewal
+vercel certs renew yourdomain.com
+```
+
+---
+
+## Resources
+
+- [Vercel Documentation](https://vercel.com/docs)
+- [Next.js on Vercel](https://vercel.com/docs/frameworks/nextjs)
+- [Edge Functions Guide](https://vercel.com/docs/functions/edge-functions)
+- [Vercel CLI Reference](https://vercel.com/docs/cli)
+
+---
+
+## Next Steps
+
+- [Configure Supabase backend](/integrations/supabase)
+- [Set up GitHub integration](/integrations/github)
+- [Add authentication](/guides/authentication)
+- [Optimize performance](/guides/performance)

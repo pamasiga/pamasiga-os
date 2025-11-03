@@ -1,0 +1,142 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linters
+        run: |
+          if [ -f "package.json" ] && grep -q "\"lint\"" package.json; then
+            pnpm run lint
+          else
+            echo "No lint script found, skipping..."
+          fi
+
+      - name: Check code formatting
+        run: |
+          if [ -f "package.json" ] && grep -q "\"format:check\"" package.json; then
+            pnpm run format:check
+          else
+            echo "No format:check script found, skipping..."
+          fi
+
+  type-check:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run type checking
+        run: |
+          if [ -f "package.json" ] && grep -q "\"type-check\"" package.json; then
+            pnpm run type-check
+          else
+            echo "No type-check script found, skipping..."
+          fi
+
+  markdown-lint:
+    name: Lint Markdown
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint markdown files
+        uses: actionshub/markdownlint@v3.1.4
+        with:
+          path: "docs/"
+          glob: "*.md"
+          config: |
+            {
+              "MD013": false,
+              "MD033": false,
+              "MD041": false
+            }
+
+  validate-config:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate startup.config.js
+        run: node -e "require('./startup.config.js')"
+
+      - name: Check for secrets in code
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+
+  folder-structure:
+    name: Validate Folder Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check required directories exist
+        run: |
+          for dir in apps services packages infra scripts tests docs website; do
+            if [ ! -d "$dir" ]; then
+              echo "Error: Required directory '$dir' does not exist"
+              exit 1
+            fi
+            echo "✓ Directory '$dir' exists"
+          done
+
+      - name: Check required files exist
+        run: |
+          for file in startup.config.js README.md .gitignore; do
+            if [ ! -f "$file" ]; then
+              echo "Error: Required file '$file' does not exist"
+              exit 1
+            fi
+            echo "✓ File '$file' exists"
+          done

@@ -1,0 +1,384 @@
+# Frequently Asked Questions
+
+## General
+
+### What is PAMASIGA OS?
+
+PAMASIGA OS is a **production-ready template** for building modern software startups. It's not a product itself, but rather a complete engineering infrastructure that you fork and customize for your own startup.
+
+Think of it as the foundation that handles all the boring infrastructure work (CI/CD, documentation, workflows, security) so you can focus on building your unique product.
+
+### Is PAMASIGA OS free?
+
+Yes! PAMASIGA OS is **100% open-source** under the MIT License. You can:
+- ✅ Use it for commercial projects
+- ✅ Modify it however you want
+- ✅ Keep your modifications private
+- ✅ Sell products built on it
+
+No attribution required (but appreciated!).
+
+### Who is PAMASIGA OS for?
+
+PAMASIGA OS is designed for:
+- 🚀 **Startups** building SaaS products
+- 👨‍💻 **Solo founders** who want professional infrastructure
+- 🏢 **Development teams** standardizing their workflow
+- 🎓 **Students** learning best practices
+- 🔬 **Researchers** building prototypes
+
+If you're writing code, PAMASIGA OS can help.
+
+---
+
+## Getting Started
+
+### How do I install PAMASIGA OS?
+
+Three simple steps:
+
+```bash
+# 1. Clone the template
+npx degit YOUR_ORG/pamasiga-os my-startup
+cd my-startup
+
+# 2. Run setup wizard
+pnpm install && pnpm run setup
+
+# 3. Create GitHub repo
+gh repo create my-startup --public --source=. --push
+```
+
+See the [Installation Guide](/getting-started/installation) for details.
+
+### Do I need to know GitHub Actions?
+
+No! All workflows are pre-configured. Just push code and they run automatically.
+
+However, if you want to customize them, basic YAML knowledge helps. See our [Workflows Guide](/workflows).
+
+### Can I use this with my existing project?
+
+Yes! You can:
+1. **Start fresh** - Recommended for new projects
+2. **Migrate incrementally** - Copy pieces you need
+3. **Learn and adapt** - Use as a reference
+
+For migration, see [Adopting PAMASIGA OS](/adoption-guide).
+
+---
+
+## Customization
+
+### How do I change the branding?
+
+Everything is controlled by `startup.config.js`:
+
+```js
+branding: {
+  colors: {
+    primary: '#YOUR_COLOR',
+    accent: '#YOUR_ACCENT'
+  }
+}
+```
+
+Then run:
+```bash
+pnpm run create-labels  # Update GitHub labels
+cd website && pnpm build  # Rebuild docs
+```
+
+See [Configuration Guide](/getting-started/configuration).
+
+### Can I use a different framework?
+
+Absolutely! PAMASIGA OS is **framework-agnostic**. Use:
+- Frontend: React, Vue, Angular, Svelte, Solid...
+- Backend: Node.js, Python, Go, Rust, Java...
+- Database: PostgreSQL, MongoDB, MySQL, Redis...
+
+Just add your code to the appropriate folder:
+- `apps/` - Your applications
+- `services/` - Your backend services
+- `packages/` - Shared libraries
+
+### How do I add Supabase/Firebase/other services?
+
+See our integration guides:
+- [Supabase Integration](/integrations/supabase)
+- [Vercel Deployment](/integrations/vercel)
+- [AWS Deployment](/integrations/aws)
+
+---
+
+## Documentation
+
+### How do I update the docs?
+
+Edit files in `website/pages/`:
+
+```bash
+cd website/pages
+# Edit any .mdx file
+vim guides/my-guide.mdx
+
+# Push to GitHub
+git add . && git commit -m "docs: update guide"
+git push
+```
+
+GitHub Actions automatically rebuilds and deploys to GitHub Pages.
+
+### Can I use a custom domain?
+
+Yes! In your GitHub repository:
+1. Go to **Settings → Pages**
+2. Add your custom domain
+3. Configure DNS with your provider
+
+See [GitHub Pages Custom Domain](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site).
+
+### How do I add search?
+
+Search is **built-in** with Nextra! It indexes all your markdown files automatically. No configuration needed.
+
+For advanced search, you can integrate:
+- Algolia DocSearch (free for open-source)
+- Custom search with Elasticsearch
+- Third-party search APIs
+
+---
+
+## Development
+
+### What's the recommended workflow?
+
+1. **Create an issue** - Describe what you're building
+2. **Create a branch** - `feature/issue-123-my-feature`
+3. **Write code + tests**
+4. **Open a PR** - Use the template
+5. **Get reviewed** - At least 1 approval
+6. **Merge** - Auto-deploy via CI/CD
+
+See [Development Workflow](/workflows/development).
+
+### How do I run tests?
+
+```bash
+# Unit tests
+pnpm test:unit
+
+# Integration tests
+pnpm test:integration
+
+# E2E tests
+pnpm test:e2e
+
+# All tests with coverage
+pnpm test:coverage
+```
+
+Add your test commands to `package.json`.
+
+### How do I deploy to production?
+
+Deployments are **automated**:
+- Push to `main` → deploys to production
+- Push to `develop` → deploys to staging
+
+Configure in `.github/workflows/deploy.yml`.
+
+Manual deployment:
+```bash
+# Trigger deployment workflow
+gh workflow run deploy.yml
+```
+
+---
+
+## AI Development
+
+### What are AI labels?
+
+PAMASIGA OS tracks AI-generated code with labels:
+- `AI-GENERATED` - Primarily written by AI
+- `AI-SUGGESTED` - AI-assisted
+- `HUMAN-REVIEWED` - AI code reviewed by human
+
+This ensures transparency and accountability.
+
+### Can AI commit directly?
+
+No! AI must follow rules in `docs/AI_AGENT_RULES.md`:
+- ✅ Can write code in PRs
+- ✅ Can suggest improvements
+- ❌ Cannot deploy to production
+- ❌ Cannot modify security settings
+- ❌ Cannot force-push
+
+All AI code must be human-reviewed.
+
+### What AI tools work with PAMASIGA OS?
+
+All of them!
+- GitHub Copilot
+- Claude Code
+- Cursor
+- ChatGPT
+- Tabnine
+- Codeium
+
+See [AI Development Guide](/guides/ai-development).
+
+---
+
+## Troubleshooting
+
+### GitHub Actions not running?
+
+Check:
+1. Actions enabled: **Settings → Actions → Allow all actions**
+2. Workflow files exist in `.github/workflows/`
+3. Syntax is valid (use YAML linter)
+4. Branch protection not blocking
+
+### Documentation site showing 404?
+
+Check:
+1. GitHub Pages enabled: **Settings → Pages**
+2. Source set to `gh-pages` branch
+3. `basePath` in `next.config.mjs` matches repo name
+4. Wait 1-2 minutes for deployment
+
+### Labels not created?
+
+Ensure:
+1. `gh` CLI is installed and authenticated
+2. You're in the repository directory
+3. Run `pnpm run create-labels`
+4. Check `startup.config.js` syntax
+
+---
+
+## Security
+
+### How do I report a security vulnerability?
+
+**Do NOT open a public issue.**
+
+Instead:
+1. Go to **Security → Advisories → New draft advisory**
+2. Or email: security@yourcompany.com
+
+See [Security Policy](https://github.com/YOUR_ORG/pamasiga-os/security/policy).
+
+### What security scans are included?
+
+PAMASIGA OS includes:
+- **Dependency scanning** - `npm audit`
+- **Secret scanning** - TruffleHog
+- **SAST** - Semgrep
+- **Code scanning** - CodeQL
+- **License check** - Automated
+
+Scans run on every PR + weekly.
+
+### Are secrets safe?
+
+Yes, if you follow best practices:
+- ✅ Use GitHub Secrets for sensitive data
+- ✅ Add secrets to `.env.example` (not `.env`)
+- ✅ Never commit `.env` files
+- ✅ Use environment variables
+
+Secret scanning catches accidental commits.
+
+---
+
+## Contributing
+
+### How can I contribute?
+
+We welcome contributions!
+
+1. **Report bugs** - Use issue templates
+2. **Suggest features** - Open discussions
+3. **Fix issues** - Submit PRs
+4. **Improve docs** - Easy way to start
+5. **Share your story** - Help others learn
+
+See [Contributing Guide](https://github.com/YOUR_ORG/pamasiga-os/blob/main/docs/REPO_POLICY.md).
+
+### What should I contribute?
+
+Ideas:
+- Framework templates (Django, Rails, etc.)
+- Integration guides (AWS, GCP, Azure)
+- CI/CD improvements
+- Documentation
+- Bug fixes
+- Tests
+
+Check [Good First Issues](https://github.com/YOUR_ORG/pamasiga-os/labels/good-first-issue).
+
+---
+
+## Support
+
+### Where can I get help?
+
+- 📖 **Documentation** - You're reading it!
+- 💬 **Discussions** - [GitHub Discussions](https://github.com/YOUR_ORG/pamasiga-os/discussions)
+- 🐛 **Issues** - [GitHub Issues](https://github.com/YOUR_ORG/pamasiga-os/issues)
+- 📧 **Email** - hello@yourcompany.com
+
+### Is there a community?
+
+Yes! Join us:
+- GitHub Discussions (Q&A, ideas, show & tell)
+- Discord (coming soon)
+- Twitter: [@yourhandle](https://twitter.com/yourhandle)
+
+### Can I hire help?
+
+While PAMASIGA OS is free and open-source, you can:
+- Hire freelancers familiar with it
+- Get consulting (contact us)
+- Offer bounties for features
+
+---
+
+## Misc
+
+### Why "PAMASIGA OS"?
+
+Good question! It stands for... well, it's a name. The important part is what it does, not what it's called. 😊
+
+### Can I fork and commercialize?
+
+Yes! MIT License allows:
+- ✅ Commercial use
+- ✅ Modification
+- ✅ Distribution
+- ✅ Private use
+
+Build your billion-dollar startup on it!
+
+### Will you support older versions?
+
+We follow **semantic versioning**:
+- Latest major version gets active development
+- Previous major version gets security fixes
+- Older versions are community-supported
+
+---
+
+## Still have questions?
+
+**Can't find your answer?** Try:
+- 🔍 [Search the docs](/)
+- 💬 [Ask in Discussions](https://github.com/YOUR_ORG/pamasiga-os/discussions)
+- 📧 [Email us](mailto:hello@yourcompany.com)
+
+We're here to help! 🚀
